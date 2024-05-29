@@ -1,16 +1,10 @@
-import { useWhitelabel } from '@/hooks/whitelabel/useWhitelabel';
 import localStorageManager from '@/services/localStorageManager';
 import chroma from 'chroma-js';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState } from 'react';
 
-export const WhitelabelContext = createContext();
+export const HandleThemmingContext = createContext();
 
-const WhitelabelProvider = ({ children }) => {
-  const hostnameParts = window.location.hostname.split('.');
-  const subdomain =
-    hostnameParts[0] == 'localhost'
-      ? import.meta.env.VITE_SUBDOMAIN
-      : hostnameParts[0];
+const HandleThemmingProvider = ({ children }) => {
   const sheets = document.styleSheets;
   let rootStyles = null;
   let darkStyles = null;
@@ -27,9 +21,9 @@ const WhitelabelProvider = ({ children }) => {
   });
 
   const [primaryColor, setPrimaryColor] = useState(
-    (localStorageManager.getItem('@Whitelabel:colors') &&
-      localStorageManager.getItem('@Whitelabel:colors').primaryColor) ||
-      '#94948d',
+    (localStorage.getItem('@Whitelabel:colors') &&
+      localStorage.getItem('@Whitelabel:colors').primaryColor) ||
+      '#f97316',
   );
   const [secondaryColor, setSecondaryColor] = useState(
     (localStorageManager.getItem('@Whitelabel:colors') &&
@@ -46,29 +40,6 @@ const WhitelabelProvider = ({ children }) => {
       localStorageManager.getItem('@Whitelabel:colors').lightness) ||
       22,
   );
-
-  // pega dados do whitelabal no banco de dados
-  const { data: getWhitelabelData } = useWhitelabel();
-  useEffect(() => {
-    getWhitelabelData &&
-      getWhitelabelData.style &&
-      localStorageManager.setItem(
-        '@Whitelabel:colors',
-        getWhitelabelData.style,
-      );
-    getWhitelabelData &&
-      getWhitelabelData.style &&
-      setPrimaryColor(getWhitelabelData.style.primaryColor);
-    getWhitelabelData &&
-      getWhitelabelData.style &&
-      setSecondaryColor(getWhitelabelData.style.secondaryColor);
-    getWhitelabelData &&
-      getWhitelabelData.style &&
-      setSaturation(getWhitelabelData.style.saturation);
-    getWhitelabelData &&
-      getWhitelabelData.style &&
-      setLightness(getWhitelabelData.style.lightness);
-  }, [getWhitelabelData]);
 
   const defaultThemeColors = {
     root: {
@@ -398,9 +369,8 @@ const WhitelabelProvider = ({ children }) => {
   });
 
   return (
-    <WhitelabelContext.Provider
+    <HandleThemmingContext.Provider
       value={{
-        subdomain,
         UpdateColorTheme,
         primaryColor,
         setPrimaryColor,
@@ -414,8 +384,8 @@ const WhitelabelProvider = ({ children }) => {
       }}
     >
       {children}
-    </WhitelabelContext.Provider>
+    </HandleThemmingContext.Provider>
   );
 };
 
-export default WhitelabelProvider;
+export default HandleThemmingProvider;
