@@ -30,6 +30,12 @@ const HandleThemmingProvider = ({ children }) => {
       localStorageManager.getItem('@Whitelabel:colors').secondaryColor) ||
       '',
   );
+
+  const [hue, setHue] = useState(
+    (localStorage.getItem('@Whitelabel:colors') &&
+      localStorage.getItem('@Whitelabel:colors').hue) ||
+      100,
+  );
   const [saturation, setSaturation] = useState(
     (localStorageManager.getItem('@Whitelabel:colors') &&
       localStorageManager.getItem('@Whitelabel:colors').saturation) ||
@@ -82,29 +88,19 @@ const HandleThemmingProvider = ({ children }) => {
     },
   };
 
-  const UpdateColorTheme = ({
-    primaryColor,
-    secondaryColor,
-    saturation,
-    lightness,
-  }) => {
-    lightness += 100;
-    const baseColor = chroma(primaryColor);
+  const UpdateColorTheme = ({ hue, secondaryColor, saturation, lightness }) => {
     let baseSecondColor;
 
     if (secondaryColor) {
       const secondColor = chroma(secondaryColor);
-      const scaleToSecondary = chroma.scale([baseColor, secondColor]);
-      baseSecondColor = scaleToSecondary(0.9);
+      // const scaleToSecondary = chroma.scale([baseColor, secondColor]);
+      // baseSecondColor = scaleToSecondary(0.9);
     }
 
-    const hueBase =
-      (!secondaryColor && (Math.round(baseColor.get('hsl.h')) || 1)) ||
-      Math.round(baseSecondColor.get('hsl.h')) ||
-      1;
+    const hueBase = Math.round(hue) || 1;
 
     const lighBase =
-      (!secondaryColor && Math.round(baseColor.get('hsl.l') * 100)) ||
+      (!secondaryColor && Math.round(lightness * 100)) ||
       Math.round(baseSecondColor.get('hsl.l') * 100);
 
     let {
@@ -145,8 +141,12 @@ const HandleThemmingProvider = ({ children }) => {
       ring: ringRoot,
     } = defaultThemeColors.root;
 
-    let primaryRoot = `${(Math.round(baseColor.get('hsl.h')) || 1).toFixed(2)} ${(baseColor.get('hsl.s') * 100).toFixed(2) + '%'} ${(baseColor.get('hsl.l') * 100).toFixed(2) + '%'}`;
-    let primaryDark = `${(Math.round(baseColor.get('hsl.h')) || 1).toFixed(2) - 4.1} ${(baseColor.get('hsl.s') * 100).toFixed(2) - 4.8 + '%'} ${(baseColor.get('hsl.l') * 100).toFixed(2) - 4.9 + '%'}`;
+    let primaryRoot = `${(Math.round(hue) || 1).toFixed(2)} ${
+      saturation.toFixed(2) + '%'
+    } ${lightness.toFixed(2) + '%'}`;
+    let primaryDark = `${(Math.round(hue) || 1).toFixed(2) - 4.1} ${
+      saturation.toFixed(2) - 4.8 + '%'
+    } ${lightness.toFixed(2) - 4.9 + '%'}`;
     darkStyles.setProperty('--primary', primaryDark);
     rootStyles.setProperty('--primary', primaryRoot);
 
@@ -160,15 +160,11 @@ const HandleThemmingProvider = ({ children }) => {
 
     backgroundDark[0] = hueBase - 1;
     backgroundDark[1] = 14.3 * 10 * (saturation / 100).toFixed(2) + '%';
-    backgroundDark[2] =
-      (4.1 * 0.7 * (lightness / 75) + (18 - (lighBase / 50) * 20)).toFixed(2) +
-      '%';
+    backgroundDark[2] = (4.1 * 1 * (lightness / 60)).toFixed(2) + '%';
 
     backgroundRoot[0] = 0;
     backgroundRoot[1] = 0 + '%';
-    backgroundRoot[2] =
-      (100 * 0.7 * (lightness / 75) + (18 - (lighBase / 50) * 20)).toFixed(2) +
-      '%';
+    backgroundRoot[2] = (100 * 0.4 * (lightness / 10) + 18).toFixed(2) + '%';
 
     foregroundDark[0] = hueBase + 39;
     foregroundRoot[0] = hueBase - 5;
@@ -333,15 +329,15 @@ const HandleThemmingProvider = ({ children }) => {
 
     // ----------------------------------------------------
 
-    inputDark[0] = hueBase - 9;
-    inputDark[1] = 6.5 * 10 * (saturation / 100).toFixed(2) + '%';
-    inputDark[2] =
-      (
-        80 * 0.07 * ((lightness + 65) / 100) +
-        (18 - (lighBase / 50) * (18 - 4.1))
-      ).toFixed(2) + '%';
+      inputDark[0] = hueBase - 9;
+      inputDark[1] = 6.5 * 10 * (saturation / 100).toFixed(2) + '%';
+      inputDark[2] =
+        (
+          80 * 0.07 * ((lightness + 65) / 100) +
+          (18 - (lighBase / 50) * (18 - 4.1))
+        ).toFixed(2) + '%';
 
-    inputRoot[0] = hueBase - 5;
+      inputRoot[0] = hueBase - 5;
 
     darkStyles.setProperty('--input', inputDark.join(' '));
     rootStyles.setProperty('--input', inputRoot.join(' '));
@@ -354,6 +350,13 @@ const HandleThemmingProvider = ({ children }) => {
     rootStyles.setProperty('--ring', ringRoot);
   };
 
+  const convertToHsl = (hex) => {
+    const baseColor = chroma(hex);
+    setHue(Math.round(baseColor.get('hsl.h')));
+    setSaturation(Math.round((baseColor.get('hsl.s') * 100).toFixed(2)));
+    setLightness(Math.round((baseColor.get('hsl.l') * 100).toFixed(2)));
+  };
+
   const resetThemeCustom = () => {
     setPrimaryColor('#f97316');
     setSecondaryColor('');
@@ -362,7 +365,7 @@ const HandleThemmingProvider = ({ children }) => {
   };
 
   UpdateColorTheme({
-    primaryColor,
+    hue,
     secondaryColor,
     saturation,
     lightness,
@@ -381,6 +384,9 @@ const HandleThemmingProvider = ({ children }) => {
         lightness,
         setLightness,
         resetThemeCustom,
+        hue,
+        setHue,
+        convertToHsl,
       }}
     >
       {children}
