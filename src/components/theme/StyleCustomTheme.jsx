@@ -66,6 +66,8 @@ export const StyleProvider = ({ children }) => {
     <StyleContext.Provider
       value={{ style, setStyle, globalStyle, setGlobalStyle }}
     >
+      <StyleCustomTheme />
+
       {children}
     </StyleContext.Provider>
   );
@@ -84,7 +86,6 @@ export const PickColor = () => {
 
     // Atualizando o estado
     setStyle(nesStyle);
-    console.log(nesStyle);
   };
 
   // UseEffect para monitorar o estado
@@ -100,10 +101,10 @@ const StyleCustomTheme = () => {
 
   const transformObjHsl = (color) => `${color.h} ${color.s}%, ${color.l}%`;
 
-  return (
-    <style>
-      {`
-          :root .theme-custom {
+  const [styleContent, setStyleContent] = useState('');
+  useEffect(() => {
+    const css = `
+    :root .theme-custom {
             --background: ${transformObjHsl(style.colors.light.background)};
             --foreground: ${transformObjHsl(style.colors.light.foreground)};
             --card: ${transformObjHsl(style.colors.light.card)};
@@ -175,9 +176,11 @@ const StyleCustomTheme = () => {
             --ring: ${transformObjHsl(style.colors.dark.ring)};
             --radius: ${style.radius}rem;
           }
-        `}
-    </style>
-  );
+        `;
+    setStyleContent(css);
+  }, [style]);
+
+  return <style>{styleContent}</style>;
 };
 
 export default StyleCustomTheme;
