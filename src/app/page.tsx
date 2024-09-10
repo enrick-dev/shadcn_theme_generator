@@ -1,15 +1,8 @@
 'use client';
-import StyleCustomTheme, {
-  PickColor,
-  StyleProvider,
-} from '@/components/theme/StyleCustomTheme';
+import { PickColor, StyleProvider } from '@/components/theme/StyleCustomTheme';
 import { useState } from 'react';
 
 export default function Home() {
-  const [time, setTime] = useState(false);
-  // setInterval(() => {
-  //   setTime(!time);
-  // }, 10000);
   return (
     <StyleProvider>
       <main className="flex min-h-screen flex-col items-center justify-between p-24">

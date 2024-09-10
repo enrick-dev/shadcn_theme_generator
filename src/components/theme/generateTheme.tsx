@@ -13,8 +13,8 @@ function generateTheme({
 
   const generateColor = (lightness: number, saturation: number) => ({
     h: baseColor.get('hsl.h'),
-    s: saturation,
-    l: lightness,
+    s: (saturation / 100) * baseColor.get('hsl.s'),
+    l: (lightness / 100) * baseColor.get('hsl.l'),
   });
 
   return {
